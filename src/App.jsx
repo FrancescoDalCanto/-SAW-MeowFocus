@@ -18,7 +18,7 @@ function App() {
   };
 
   return (
-    <div className="flex flex-col items-center h-screen w-full bg-black p-4">
+    <div className="grid grid-cols-1 place-items-center h-screen w-full bg-black p-4">
       {/* Titolo */}
       <h1 className="text-6xl font-bold text-[#FFA500] mt-8 mb-16">MeowHub</h1>
 
@@ -33,6 +33,7 @@ function App() {
         >
           Login
         </button>
+       
         <button
           className="bg-[#FFA500] text-white text-base px-8 py-[15px] border-none rounded-lg"
           onClick={() => openPopup("Register")}  // Quando il pulsante "Register" viene cliccato, apre il popup

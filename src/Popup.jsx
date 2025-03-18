@@ -16,7 +16,7 @@ const Popup = ({ type, onClose }) => {
       onClose();  
     } catch (error) {
       console.error("Error logging in with email/password: ", error.message);
-      setError(error.message);  // Gestisci l'errore
+      handleFirebaseError(error);  // Gestisci l'errore
     } finally {
       setLoading(false);
     }
@@ -31,7 +31,7 @@ const Popup = ({ type, onClose }) => {
       onClose();  
     } catch (error) {
       console.error("Error registering with email/password: ", error.message);
-      setError(error.message);  // Gestisci l'errore
+      handleFirebaseError(error);  // Gestisci l'errore
     } finally {
       setLoading(false);
     }
@@ -43,10 +43,42 @@ const Popup = ({ type, onClose }) => {
       await signInWithPopup(auth, googleProvider);  // Login con Google
       console.log("Google login successful");
       onClose();  
+      
     } catch (error) {
       console.error("Error logging in with Google: ", error.message);
-      setError(error.message);  
+      handleFirebaseError(error);  // Gestisci l'errore
     }
+  };
+
+  // Gestione degli errori Firebase
+  const handleFirebaseError = (error) => {
+    let errorMessage = "An error occurred, please try again.";  // Messaggio di errore generico
+
+    // Gestisci errori specifici da Firebase
+    switch (error.code) {
+      case 'auth/invalid-email':
+        errorMessage = "L'indirizzo email non è valido. Per favore, controlla il formato.";
+        break;
+      case 'auth/user-disabled':
+        errorMessage = "Il tuo account è stato disabilitato. Per favore, contatta il supporto.";
+        break;
+      case 'auth/user-not-found':
+        errorMessage = "Nessun utente trovato con questo indirizzo email.";
+        break;
+      case 'auth/wrong-password':
+        errorMessage = "La password che hai inserito è errata.";
+        break;
+      case 'auth/email-already-in-use':
+        errorMessage = "L'indirizzo email è già in uso da un altro account.";
+        break;
+      case 'auth/weak-password':
+        errorMessage = "La tua password è troppo debole. Per favore, scegli una password più forte.";
+        break;
+      default:
+        errorMessage = error.message;  // Usa il messaggio di errore di Firebase se non è specifico
+    }
+
+    setError(errorMessage);  // Imposta il messaggio di errore personalizzato
   };
 
   return (
@@ -58,20 +90,20 @@ const Popup = ({ type, onClose }) => {
 
         {/* Form per login con Email/Password */}
         {type === "Login" && (
-          <div className="mb-4">
+          <div className="grid gap-4 mb-4">
             <input 
               type="email" 
               placeholder="Email" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2 mb-4 border rounded" 
+              className="w-full p-2 border rounded" 
             />
             <input 
               type="password" 
               placeholder="Password" 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 mb-4 border rounded" 
+              className="w-full p-2 border rounded" 
             />
             <button 
               className="w-full bg-[#FFA500] text-white p-2 rounded"
@@ -85,20 +117,20 @@ const Popup = ({ type, onClose }) => {
 
         {/* Form per registrazione con Email/Password */}
         {type === "Register" && (
-          <div className="mb-4">
+          <div className="grid gap-4 mb-4">
             <input 
               type="email" 
               placeholder="Email" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2 mb-4 border rounded" 
+              className="w-full p-2 border rounded" 
             />
             <input 
               type="password" 
               placeholder="Password" 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 mb-4 border rounded" 
+              className="w-full p-2 border rounded" 
             />
             <button 
               className="w-full bg-[#FFA500] text-white p-2 rounded"

@@ -1,48 +1,72 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
-import Popup from "./Popup";  // Importa il componente Popup
+import Popup from "./Popup";
+import { useAuth } from "./AuthContext";
+import { useNavigate } from "react-router-dom";
 
+/**
+ * Componente principale dell'applicazione
+ * Gestisce la pagina di login/registrazione
+ * @returns {JSX.Element} Rendering della pagina principale
+ */
 function App() {
-  const [showPopup, setShowPopup] = useState(false);  // Stato per la visibilità del popup
-  const [popupType, setPopupType] = useState("");  // Stato per il tipo di popup ("Login" o "Register")
+  // Stato per controllare la visibilità del popup
+  const [showPopup, setShowPopup] = useState(false);
+  // Stato per definire il tipo di popup (Login o Register)
+  const [popupType, setPopupType] = useState("");
+  // Ottieni l'utente corrente dal contesto di autenticazione
+  const { currentUser } = useAuth();
+  // Hook per la navigazione programmatica
+  const navigate = useNavigate();
+  
+  // Effetto per reindirizzare l'utente già autenticato alla sua pagina personale
+  useEffect(() => {
+    if (currentUser) {
+      navigate("/user");
+    }
+  }, [currentUser, navigate]);
 
-  // Funzione per aprire il popup
+  /**
+   * Funzione per aprire il popup di autenticazione
+   * @param {string} type - Tipo di popup ("Login" o "Register")
+   */
   const openPopup = (type) => {
-    setPopupType(type);  // Imposta il tipo di popup (Login o Register)
-    setShowPopup(true);  // Mostra il popup
+    setPopupType(type);
+    setShowPopup(true);
   };
 
-  // Funzione per chiudere il popup
+  /**
+   * Funzione per chiudere il popup di autenticazione
+   */
   const closePopup = () => {
-    setShowPopup(false);  // Nascondi il popup
+    setShowPopup(false);
   };
 
   return (
     <div className="grid grid-cols-1 place-items-center h-screen w-full bg-black p-4">
-      {/* Titolo */}
+      {/* Titolo dell'applicazione */}
       <h1 className="text-6xl font-bold text-[#FFA500] mt-8 mb-16">MeowHub</h1>
-
-      {/* Logo */}
+      
+      {/* Logo dell'applicazione */}
       <img src="../public/PomoStudy.png" alt="MeowFocus" className="max-w-[500px] w-full h-auto mb-8" />
-
-      {/* Pulsanti per la Registrazione e il Login */}
+      
+      {/* Pulsanti per l'autenticazione */}
       <div className="flex gap-4">
         <button
           className="bg-[#FFA500] text-white text-base px-8 py-[15px] border-none rounded-lg"
-          onClick={() => openPopup("Login")}  // Quando il pulsante "Login" viene cliccato, apre il popup
+          onClick={() => openPopup("Login")}
         >
           Login
         </button>
-       
         <button
           className="bg-[#FFA500] text-white text-base px-8 py-[15px] border-none rounded-lg"
-          onClick={() => openPopup("Register")}  // Quando il pulsante "Register" viene cliccato, apre il popup
+          onClick={() => openPopup("Register")}
         >
           Register
         </button>
       </div>
-
-      {/* Se il popup deve essere visibile, viene renderizzato sopra il contenuto */}
+      
+      {/* Popup di autenticazione (condizionale) */}
       {showPopup && <Popup type={popupType} onClose={closePopup} />}
     </div>
   );

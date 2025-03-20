@@ -1,60 +1,98 @@
 import React, { useState } from "react";
-import { auth, signInWithEmailAndPassword, signInWithPopup, googleProvider, createUserWithEmailAndPassword } from "./firebase";  // Importa i metodi aggiornati di Firebase
+import { useNavigate } from "react-router-dom";
+import { auth, signInWithEmailAndPassword, signInWithPopup, googleProvider, createUserWithEmailAndPassword } from "./firebase";
 
+/**
+ * Componente Popup per gestire l'autenticazione
+ * Supporta login e registrazione con email/password e autenticazione Google
+ * @param {Object} props - Proprietà del componente
+ * @param {string} props.type - Tipo di popup ("Login" o "Register")
+ * @param {Function} props.onClose - Funzione per chiudere il popup
+ * @returns {JSX.Element} Rendering del popup di autenticazione
+ */
 const Popup = ({ type, onClose }) => {
+  // Stati per gestire i dati del form
   const [email, setEmail] = useState("");  
   const [password, setPassword] = useState("");  
   const [loading, setLoading] = useState(false);  
-  const [error, setError] = useState("");  // Stato per gestire gli errori
+  const [error, setError] = useState("");
+  // Hook per la navigazione programmatica
+  const navigate = useNavigate();
 
-  // Funzione di login con Email/Password
+  /**
+   * Gestisce il login con email e password
+   * @async
+   */
   const handleEmailPasswordLogin = async () => {
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);  // Login
-      console.log("Email/Password Login successful");
+      // Tenta il login con Firebase
+      await signInWithEmailAndPassword(auth, email, password);
+      console.log("Email/Password Login successful");    
+      // Reindirizza alla pagina utente
+      navigate("/user");
+      // Chiude il popup
       onClose();  
     } catch (error) {
       console.error("Error logging in with email/password: ", error.message);
-      handleFirebaseError(error);  // Gestisci l'errore
+      // Gestisce l'errore di autenticazione
+      handleFirebaseError(error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Funzione di registrazione con Email/Password
+  /**
+   * Gestisce la registrazione con email e password
+   * @async
+   */
   const handleEmailPasswordRegister = async () => {
     setLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, email, password);  // Registrazione
+      // Tenta la registrazione con Firebase
+      await createUserWithEmailAndPassword(auth, email, password);
       console.log("Email/Password Registration successful");
+      // Reindirizza alla pagina utente
+      navigate("/user");
+      // Chiude il popup
       onClose();  
     } catch (error) {
       console.error("Error registering with email/password: ", error.message);
-      handleFirebaseError(error);  // Gestisci l'errore
+      // Gestisce l'errore di registrazione
+      handleFirebaseError(error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Funzione di login con Google
+  /**
+   * Gestisce il login con Google
+   * @async
+   */
   const handleGoogleLogin = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);  // Login con Google
+      // Tenta il login con Google tramite Firebase
+      await signInWithPopup(auth, googleProvider);
       console.log("Google login successful");
+      // Reindirizza alla pagina utente
+      navigate("/user");
+      // Chiude il popup
       onClose();  
-      
     } catch (error) {
       console.error("Error logging in with Google: ", error.message);
-      handleFirebaseError(error);  // Gestisci l'errore
+      // Gestisce l'errore di autenticazione
+      handleFirebaseError(error);
     }
   };
 
-  // Gestione degli errori Firebase
+  /**
+   * Gestisce gli errori di Firebase e li traduce in messaggi comprensibili
+   * @param {Object} error - Oggetto errore di Firebase
+   */
   const handleFirebaseError = (error) => {
-    let errorMessage = "An error occurred, please try again.";  // Messaggio di errore generico
+    let errorMessage = "An error occurred, please try again.";
 
-    // Gestisci errori specifici da Firebase
+    // Personalizza i messaggi di errore in base al codice
     switch (error.code) {
       case 'auth/invalid-email':
         errorMessage = "L'indirizzo email non è valido. Per favore, controlla il formato.";
@@ -75,20 +113,23 @@ const Popup = ({ type, onClose }) => {
         errorMessage = "La tua password è troppo debole. Per favore, scegli una password più forte.";
         break;
       default:
-        errorMessage = error.message;  // Usa il messaggio di errore di Firebase se non è specifico
+        errorMessage = error.message;
     }
 
-    setError(errorMessage);  // Imposta il messaggio di errore personalizzato
+    // Imposta il messaggio di errore
+    setError(errorMessage);
   };
 
   return (
     <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
       <div className="bg-white p-8 rounded-lg w-[400px]">
+        {/* Titolo del popup */}
         <h2 className="text-2xl mb-4">{type} Form</h2>
         
-        {error && <div className="text-red-500 mb-4">{error}</div>}  {/* Mostra errori */}
+        {/* Visualizzazione degli errori */}
+        {error && <div className="text-red-500 mb-4">{error}</div>}
 
-        {/* Form per login con Email/Password */}
+        {/* Form di login */}
         {type === "Login" && (
           <div className="grid gap-4 mb-4">
             <input 
@@ -115,7 +156,7 @@ const Popup = ({ type, onClose }) => {
           </div>
         )}
 
-        {/* Form per registrazione con Email/Password */}
+        {/* Form di registrazione */}
         {type === "Register" && (
           <div className="grid gap-4 mb-4">
             <input 
@@ -142,7 +183,7 @@ const Popup = ({ type, onClose }) => {
           </div>
         )}
 
-        {/* Google Login */}
+        {/* Login con Google */}
         <div className="flex justify-center items-center mt-4">
           <button 
             className="bg-white text-[#4285F4] p-2 border border-[#4285F4] rounded-lg"
@@ -158,6 +199,7 @@ const Popup = ({ type, onClose }) => {
           </button>
         </div>
 
+        {/* Pulsante per chiudere il popup */}
         <button 
           onClick={onClose} 
           className="mt-4 w-full bg-gray-500 text-white p-2 rounded"

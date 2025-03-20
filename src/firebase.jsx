@@ -1,7 +1,10 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 
-// Configurazione di Firebase
+/**
+ * Configurazione di Firebase
+ * Contiene le credenziali per l'accesso all'API Firebase
+ */
 const firebaseConfig = {
   apiKey: "AIzaSyASBiiJxcz3_r9jZRCGY4qnn-EgPGf-ATU",
   authDomain: "studybreak-ea664.firebaseapp.com",
@@ -12,10 +15,12 @@ const firebaseConfig = {
   measurementId: "G-6GS50R6153"
 };
 
-// Inizializzazione di Firebase
+// Inizializzazione dell'app Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app); // Ottieni l'autenticazione
-const googleProvider = new GoogleAuthProvider(); // Provider per Google
+// Inizializzazione del servizio di autenticazione
+const auth = getAuth(app);
+// Creazione del provider Google per l'autenticazione
+const googleProvider = new GoogleAuthProvider();
 
-// Esporta i metodi di autenticazione
+// Esportazione dei servizi e metodi di autenticazione
 export { auth, signInWithEmailAndPassword, signInWithPopup, googleProvider, createUserWithEmailAndPassword };

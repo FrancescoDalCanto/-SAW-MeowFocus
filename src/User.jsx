@@ -1,14 +1,10 @@
-/**
- * TODO: Devo sistemare il template del sito perchè per il momento è disiorganizzato.
- */
-
-
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // Importa useNavigate per la navigazione
 import { useAuth } from "./AuthContext";
 import { signOut } from "firebase/auth";
 import { auth } from "./firebase";
-import { useNavigate } from "react-router-dom";
 import StudyBreakTimer from "./Timer";
+import Join_session from "./JoinSession"; // Importa correttamente il componente Join_session
 
 /**
  * Componente della pagina utente personale
@@ -16,31 +12,21 @@ import StudyBreakTimer from "./Timer";
  * @returns {JSX.Element} Rendering della pagina utente
  */
 function User() {
-  // Ottieni l'utente corrente dal contesto di autenticazione
   const { currentUser } = useAuth();
-  // Hook per la navigazione programmatica
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Hook per navigare tra le pagine
+  const [studyDuration, setStudyDuration] = useState(25);
+  const [breakDuration, setBreakDuration] = useState(5);
+  const [isJoinSessionOpen, setIsJoinSessionOpen] = useState(false); // Stato per gestire la visibilità del pop-up
 
-  // Stati per le durate di studio e pausa
-  const [studyDuration, setStudyDuration] = useState(25); // durata di studio in minuti
-  const [breakDuration, setBreakDuration] = useState(5); // durata pausa in minuti
-
-  /**
-   * Gestisce il logout dell'utente
-   * @async
-   */
   const handleLogout = async () => {
     try {
-      // Esegue il logout da Firebase
       await signOut(auth);
-      // Reindirizza alla pagina principale
       navigate("/");
     } catch (error) {
       console.error("Error logging out:", error);
     }
   };
 
-  // Funzione per aggiornare la durata dello studio (verifica che sia numerica)
   const handleStudyDurationChange = (e) => {
     const value = parseInt(e.target.value);
     if (!isNaN(value) && value >= 0) {
@@ -48,8 +34,6 @@ function User() {
     }
   };
 
-
-  // Funzione per aggiornare la durata della pausa (verifica che sia numerica)
   const handleBreakDurationChange = (e) => {
     const newBreak = parseInt(e.target.value);
     if (!isNaN(newBreak) && newBreak > 0) {
@@ -58,17 +42,30 @@ function User() {
   };
 
   useEffect(() => {
-    // Forza un reset del timer ogni volta che studyDuration o breakDuration cambiano
-    setStudyDuration(studyDuration); // Rimuove il problema del valore predefinito
+    setStudyDuration(studyDuration);
   }, [studyDuration, breakDuration]);
+
+  // Funzione per aprire il pop-up "Join Session"
+  const openJoinSessionPopup = () => {
+    setIsJoinSessionOpen(true);
+  };
+
+  // Funzione per chiudere il pop-up "Join Session"
+  const closeJoinSessionPopup = () => {
+    setIsJoinSessionOpen(false);
+  };
+
+  // Funzione per reindirizzare alla pagina Stanza
+  const openStanza = () => {
+    navigate("/stanza"); // Reindirizza alla pagina della sessione
+  };
 
   return (
     <div className="flex flex-col items-center justify-between h-screen w-full bg-black px-12 py-4">
-
       {/* Pulsante di logout */}
       <button
         onClick={handleLogout}
-        className="absolute top-15 right-20 bg-[#FFA500] text-white text-base px-8 py-[15px] border-none rounded-lg"
+        className="absolute top-15 right-20 bg-purple-700 text-white text-base px-8 py-[15px] border-none rounded-lg"
       >
         Logout
       </button>
@@ -76,7 +73,7 @@ function User() {
       {/* Container principale con spacing uniforme */}
       <div className="flex flex-col items-center justify-center gap-16 h-full pt-12 pb-24">
         {/* Titolo di benvenuto */}
-        <h3 className="text-6xl font-bold text-[#FFA500]">
+        <h3 className="text-6xl font-bold text-purple-400">
           È ora di studiare!
         </h3>
 
@@ -86,7 +83,32 @@ function User() {
         </div>
       </div>
 
-      {/* Input per la durata dello studio - riprogettato */}
+      {/* Pulsante per la creazione della sessione */}
+      <div className="flex justify-center items-center w-full mb-10 gap-8">
+        <div className="flex flex-row items-center justify-center gap-10 h-full pt-12 pb-2">
+          <button
+            className="bg-purple-500 text-white text-base px-8 py-[15px] border-none rounded-lg"
+            onClick={openStanza} // Utilizza la funzione openStanza
+          >
+            New Session
+          </button>
+        </div>
+
+        {/* Pulsante Join Session */}
+        <div className="flex flex-row items-center justify-center gap-10 h-full pt-12 pb-2">
+          <button
+            className="bg-purple-500 text-white text-base px-8 py-[15px] border-none rounded-lg"
+            onClick={openJoinSessionPopup}
+          >
+            Join Session
+          </button>
+        </div>
+      </div>
+
+      {/* Popup per Join Session */}
+      {isJoinSessionOpen && <Join_session closePopup={closeJoinSessionPopup} />}
+
+      {/* Input per la durata dello studio */}
       <div className="flex justify-center items-center w-full mb-10 gap-8">
         <div className="flex flex-col items-center">
           <label className="text-white mb-2 text-lg">Durata Studio (minuti)</label>
@@ -94,10 +116,9 @@ function User() {
             type="number"
             value={studyDuration}
             onChange={handleStudyDurationChange}
-            className="bg-gray-700 text-white p-3 rounded-lg text-center w-24 text-xl focus:outline-none focus:ring-2 focus:ring-[#FFA500] no-spinner"
+            className="bg-gray-700 text-white p-3 rounded-lg text-center w-24 text-xl focus:outline-none focus:ring-2 focus:ring-purple-400 no-spinner"
             min="0"
           />
-
         </div>
         <div className="flex flex-col items-center">
           <label className="text-white mb-2 text-lg">Durata Pausa (minuti)</label>
@@ -105,7 +126,7 @@ function User() {
             type="number"
             value={breakDuration}
             onChange={handleBreakDurationChange}
-            className="bg-gray-700 text-white p-3 rounded-lg text-center w-24 text-xl focus:outline-none focus:ring-2 focus:ring-[#FFA500] no-spinner"
+            className="bg-gray-700 text-white p-3 rounded-lg text-center w-24 text-xl focus:outline-none focus:ring-2 focus:ring-purple-400 no-spinner"
             min="0"
           />
         </div>

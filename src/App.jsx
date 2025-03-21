@@ -25,7 +25,7 @@ function App() {
   const { currentUser } = useAuth();
   // Hook per la navigazione programmatica
   const navigate = useNavigate();
-  
+
   // Effetto per reindirizzare l'utente già autenticato alla sua pagina personale
   useEffect(() => {
     if (currentUser) {
@@ -52,27 +52,27 @@ function App() {
   return (
     <div className="grid grid-cols-1 place-items-center h-screen w-full bg-black p-4">
       {/* Titolo dell'applicazione */}
-      <h1 className="text-6xl font-bold text-[#FFA500] mt-8 mb-16">MeowHub</h1>
-      
+      <h1 className="text-6xl font-bold text-purple-400 mt-8 mb-16">MeowFocus</h1>
+
       {/* Logo dell'applicazione */}
       <img src="../public/PomoStudy.png" alt="MeowFocus" className="max-w-[500px] w-full h-auto mb-8" />
-      
+
       {/* Pulsanti per l'autenticazione */}
       <div className="flex gap-4">
         <button
-          className="bg-[#FFA500] text-white text-base px-8 py-[15px] border-none rounded-lg"
+          className="bg-purple-500 text-white text-base px-8 py-[15px] border-none rounded-lg"
           onClick={() => openPopup("Login")}
         >
           Login
         </button>
         <button
-          className="bg-[#FFA500] text-white text-base px-8 py-[15px] border-none rounded-lg"
+          className="bg-purple-500 text-white text-base px-8 py-[15px] border-none rounded-lg"
           onClick={() => openPopup("Register")}
         >
           Register
         </button>
       </div>
-      
+
       {/* Popup di autenticazione (condizionale) */}
       {showPopup && <Popup type={popupType} onClose={closePopup} />}
     </div>

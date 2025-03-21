@@ -1,3 +1,10 @@
+/**
+ * 
+ * TODO: Devo Aggiungere la lista delle sessioni attive
+ * 
+ * TODO: Devo aggiungere un piccolo Easter egg che compare e scompare se viene passato il mouse sopra, questo sul lato di destra
+ */
+
 import React, { useState, useEffect } from "react";
 import "./App.css";
 import Popup from "./Popup";

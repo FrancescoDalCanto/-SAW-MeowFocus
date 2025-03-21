@@ -1,3 +1,8 @@
+/**
+ * TODO: Devo sistemare il template del sito perchè per il momento è disiorganizzato.
+ */
+
+
 import React, { useState, useEffect } from "react";
 import { useAuth } from "./AuthContext";
 import { signOut } from "firebase/auth";
@@ -37,11 +42,12 @@ function User() {
 
   // Funzione per aggiornare la durata dello studio (verifica che sia numerica)
   const handleStudyDurationChange = (e) => {
-    const newDuration = parseInt(e.target.value);
-    if (!isNaN(newDuration) && newDuration > 0) {
-      setStudyDuration(newDuration);
+    const value = parseInt(e.target.value);
+    if (!isNaN(value) && value >= 0) {
+      setStudyDuration(value);
     }
   };
+
 
   // Funzione per aggiornare la durata della pausa (verifica che sia numerica)
   const handleBreakDurationChange = (e) => {
@@ -57,44 +63,53 @@ function User() {
   }, [studyDuration, breakDuration]);
 
   return (
-    <div className="grid grid-cols-1 place-items-center h-screen w-full bg-black p-4">
-      {/* Titolo di benvenuto */}
-      <h3 className="text-6xl font-bold text-[#FFA500] mt-8 mb-16">E' ora di studiare!</h3>
-
-      {/* Input per la durata dello studio */}
-      <div className="mb-4 text-white">
-        <label className="mr-2">Durata Studio (minuti):</label>
-        <input
-          type="number"
-          value={studyDuration}
-          onChange={handleStudyDurationChange}
-          className="bg-gray-700 text-white p-2 rounded"
-          min="1"
-        />
-      </div>
-
-      {/* Input per la durata della pausa */}
-      <div className="mb-8 text-white">
-        <label className="mr-2">Durata Pausa (minuti):</label>
-        <input
-          type="number"
-          value={breakDuration}
-          onChange={handleBreakDurationChange}
-          className="bg-gray-700 text-white p-2 rounded"
-          min="1"
-        />
-      </div>
+    <div className="flex flex-col items-center justify-between h-screen w-full bg-black px-12 py-4">
 
       {/* Pulsante di logout */}
       <button
         onClick={handleLogout}
-        className="bg-[#FFA500] text-white text-base px-8 py-[15px] border-none rounded-lg mb-4"
+        className="absolute top-15 right-20 bg-[#FFA500] text-white text-base px-8 py-[15px] border-none rounded-lg"
       >
         Logout
       </button>
 
-      {/* Timer con durate personalizzabili */}
-      <StudyBreakTimer studyDuration={studyDuration * 60} breakDuration={breakDuration * 60} />
+      {/* Container principale con spacing uniforme */}
+      <div className="flex flex-col items-center justify-center gap-16 h-full pt-12 pb-24">
+        {/* Titolo di benvenuto */}
+        <h3 className="text-6xl font-bold text-[#FFA500]">
+          È ora di studiare!
+        </h3>
+
+        {/* Timer con durate personalizzabili */}
+        <div className="w-full">
+          <StudyBreakTimer studyDuration={studyDuration * 60} breakDuration={breakDuration * 60} />
+        </div>
+      </div>
+
+      {/* Input per la durata dello studio - riprogettato */}
+      <div className="flex justify-center items-center w-full mb-10 gap-8">
+        <div className="flex flex-col items-center">
+          <label className="text-white mb-2 text-lg">Durata Studio (minuti)</label>
+          <input
+            type="number"
+            value={studyDuration}
+            onChange={handleStudyDurationChange}
+            className="bg-gray-700 text-white p-3 rounded-lg text-center w-24 text-xl focus:outline-none focus:ring-2 focus:ring-[#FFA500] no-spinner"
+            min="0"
+          />
+
+        </div>
+        <div className="flex flex-col items-center">
+          <label className="text-white mb-2 text-lg">Durata Pausa (minuti)</label>
+          <input
+            type="number"
+            value={breakDuration}
+            onChange={handleBreakDurationChange}
+            className="bg-gray-700 text-white p-3 rounded-lg text-center w-24 text-xl focus:outline-none focus:ring-2 focus:ring-[#FFA500] no-spinner"
+            min="0"
+          />
+        </div>
+      </div>
     </div>
   );
 }

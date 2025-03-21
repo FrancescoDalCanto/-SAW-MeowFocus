@@ -2,3 +2,23 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+
+/* Custom utility per rimuovere le freccette dagli input number */
+@layer utilities {
+
+    /* Firefox */
+    .no-spinner {
+        -moz-appearance: textfield;
+
+    }
+
+    /* Chrome, Safari, Edge */
+    .no-spinner::-webkit-inner-spin-button,
+    .no-spinner::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+
+        margin: 0;
+    }
+}

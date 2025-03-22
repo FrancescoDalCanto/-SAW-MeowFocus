@@ -28,22 +28,31 @@ function User() {
   };
 
   const handleStudyDurationChange = (e) => {
-    const value = parseInt(e.target.value);
-    if (!isNaN(value) && value >= 0) {
-      setStudyDuration(value);
+    const value = e.target.value;
+    if (value === "") {
+      setStudyDuration(""); // Permette di lasciare vuoto l'input temporaneamente
+      return;
+    }
+
+    const parsedValue = parseInt(value);
+    if (!isNaN(parsedValue) && parsedValue >= 0) {
+      setStudyDuration(parsedValue);
     }
   };
 
   const handleBreakDurationChange = (e) => {
-    const newBreak = parseInt(e.target.value);
-    if (!isNaN(newBreak) && newBreak > 0) {
-      setBreakDuration(newBreak);
+    const value = e.target.value;
+    if (value === "") {
+      setBreakDuration(""); // Permette di lasciare vuoto l'input temporaneamente
+      return;
+    }
+
+    const parsedValue = parseInt(value);
+    if (!isNaN(parsedValue) && parsedValue >= 0) {
+      setBreakDuration(parsedValue);
     }
   };
 
-  useEffect(() => {
-    setStudyDuration(studyDuration);
-  }, [studyDuration, breakDuration]);
 
   // Funzione per aprire il pop-up "Join Session"
   const openJoinSessionPopup = () => {
@@ -61,7 +70,8 @@ function User() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-between h-screen w-full bg-black px-12 py-4">
+    <div className="flex flex-col items-center justify-start min-h-screen w-full bg-black px-12 py-8">
+
       {/* Pulsante di logout */}
       <button
         onClick={handleLogout}
@@ -70,46 +80,43 @@ function User() {
         Logout
       </button>
 
-      {/* Container principale con spacing uniforme */}
-      <div className="flex flex-col items-center justify-center gap-16 h-full pt-12 pb-24">
-        {/* Titolo di benvenuto */}
+      {/* Titolo + Timer */}
+      <div className="flex flex-col items-center justify-center gap-16 pt-12">
+
         <h3 className="text-6xl font-bold text-purple-400">
           È ora di studiare!
         </h3>
 
-        {/* Timer con durate personalizzabili */}
         <div className="w-full">
-          <StudyBreakTimer studyDuration={studyDuration * 60} breakDuration={breakDuration * 60} />
+          <StudyBreakTimer
+            studyDuration={(parseInt(studyDuration) || 0) * 60}
+            breakDuration={(parseInt(breakDuration) || 0) * 60}
+          />
         </div>
       </div>
 
-      {/* Pulsante per la creazione della sessione */}
-      <div className="flex justify-center items-center w-full mb-10 gap-8">
-        <div className="flex flex-row items-center justify-center gap-10 h-full pt-12 pb-2">
-          <button
-            className="bg-purple-500 text-white text-base px-8 py-[15px] border-none rounded-lg"
-            onClick={openStanza} // Utilizza la funzione openStanza
-          >
-            New Session
-          </button>
-        </div>
+      {/* Pulsanti per le sessioni */}
+      <div className="flex justify-center items-center mt-16 gap-8">
+        <button
+          className="bg-purple-500 text-white text-base px-8 py-[15px] border-none rounded-lg"
+          onClick={openStanza}
+        >
+          New Session
+        </button>
 
-        {/* Pulsante Join Session */}
-        <div className="flex flex-row items-center justify-center gap-10 h-full pt-12 pb-2">
-          <button
-            className="bg-purple-500 text-white text-base px-8 py-[15px] border-none rounded-lg"
-            onClick={openJoinSessionPopup}
-          >
-            Join Session
-          </button>
-        </div>
+        <button
+          className="bg-purple-500 text-white text-base px-8 py-[15px] border-none rounded-lg"
+          onClick={openJoinSessionPopup}
+        >
+          Join Session
+        </button>
       </div>
 
-      {/* Popup per Join Session */}
+      {/* Popup Join Session */}
       {isJoinSessionOpen && <Join_session closePopup={closeJoinSessionPopup} />}
 
-      {/* Input per la durata dello studio */}
-      <div className="flex justify-center items-center w-full mb-10 gap-8">
+      {/* Input durate */}
+      <div className="flex justify-center items-center mt-12 gap-8">
         <div className="flex flex-col items-center">
           <label className="text-white mb-2 text-lg">Durata Studio (minuti)</label>
           <input
@@ -131,8 +138,10 @@ function User() {
           />
         </div>
       </div>
+
     </div>
   );
+
 }
 
 export default User;

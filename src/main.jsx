@@ -27,7 +27,7 @@ createRoot(document.getElementById('root')).render(
           } />
 
           {/* Route per la pagina della sessione */}
-          <Route path="/stanza" element={<Stanza />} /> {/* Aggiungi la route per Stanza */}
+          <Route path="/stanza" element={<Stanza />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

@@ -1,27 +1,26 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Importa useNavigate per la navigazione
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import { signOut } from "firebase/auth";
 import { auth } from "./firebase";
 import StudyBreakTimer from "./Timer";
-import Join_session from "./JoinSession"; // Importa correttamente il componente Join_session
-import useLoFiMusic from "./useLoFiMusic"; // Importa il custom hook per la musica LO-FI
+import JoinSession from "./JoinSession";
+import useLoFiMusic from "./useLoFiMusic";
 
-/**
- * Componente della pagina utente personale
- * Accessibile solo dopo l'autenticazione
- * @returns {JSX.Element} Rendering della pagina utente
- */
 function User() {
   const { currentUser } = useAuth();
-  const navigate = useNavigate(); // Hook per navigare tra le pagine
+  const navigate = useNavigate();
   const [studyDuration, setStudyDuration] = useState(25);
   const [breakDuration, setBreakDuration] = useState(5);
-  const [isJoinSessionOpen, setIsJoinSessionOpen] = useState(false); // Stato per gestire la visibilità del pop-up
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // Stato per gestire l'apertura del menu a tendina
-
-  // Importazione del hook per la musica LO-FI
+  const [isJoinSessionOpen, setIsJoinSessionOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isLoFiMusicOn, toggleLoFiMusic } = useLoFiMusic();
+
+  const getUserDisplayName = () => {
+    if (!currentUser) return '';
+    return currentUser.displayName ||
+      (currentUser.email ? currentUser.email.split('@')[0] : 'Utente');
+  };
 
   const handleLogout = async () => {
     try {
@@ -32,140 +31,153 @@ function User() {
     }
   };
 
-  const handleStudyDurationChange = (e) => {
+  const handleDurationChange = (setter) => (e) => {
     const value = e.target.value;
     if (value === "") {
-      setStudyDuration(""); // Permette di lasciare vuoto l'input temporaneamente
+      setter("");
       return;
     }
-
     const parsedValue = parseInt(value);
-    if (!isNaN(parsedValue) && parsedValue >= 0) {
-      setStudyDuration(parsedValue);
+    if (!isNaN(parsedValue)) {
+      setter(Math.max(0, parsedValue));
     }
-  };
-
-  const handleBreakDurationChange = (e) => {
-    const value = e.target.value;
-    if (value === "") {
-      setBreakDuration(""); // Permette di lasciare vuoto l'input temporaneamente
-      return;
-    }
-
-    const parsedValue = parseInt(value);
-    if (!isNaN(parsedValue) && parsedValue >= 0) {
-      setBreakDuration(parsedValue);
-    }
-  };
-
-  // Funzione per aprire il pop-up "Join Session"
-  const openJoinSessionPopup = () => {
-    setIsJoinSessionOpen(true);
-  };
-
-  // Funzione per chiudere il pop-up "Join Session"
-  const closeJoinSessionPopup = () => {
-    setIsJoinSessionOpen(false);
-  };
-
-  // Funzione per reindirizzare alla pagina Stanza
-  const openStanza = () => {
-    navigate("/stanza"); // Reindirizza alla pagina della sessione
-  };
-
-  // Funzione per gestire l'apertura/chiusura del menu hamburger
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
   };
 
   return (
-    <div className="flex flex-col items-center justify-start min-h-screen w-full bg-black px-12 py-8">
-      {/* Pulsante di logout */}
-      <button
-        onClick={handleLogout}
-        className="absolute top-15 right-20 bg-purple-700 text-white text-base px-8 py-[15px] border-none rounded-lg"
-      >
-        Logout
-      </button>
+    <div className="min-h-screen bg-gray-900 text-white p-4 md:p-8 relative">
+      {/* Header con titolo centrato */}
+      <header className="grid grid-cols-3 items-center mb-8 md:mb-12">
+        {/* Parte sinistra - Menu e nome utente */}
+        <div className="flex items-center gap-4 justify-start">
+          <div className="relative">
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className={`p-3 rounded-lg transition-colors ${isMenuOpen ? 'bg-purple-700' : 'bg-purple-800 hover:bg-purple-700'}`}
+              aria-label="Menu"
+            >
+              <div className="space-y-1.5 w-6">
+                <span className={`block h-0.5 bg-white transition-all ${isMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
+                <span className={`block h-0.5 bg-white ${isMenuOpen ? 'opacity-0' : ''}`}></span>
+                <span className={`block h-0.5 bg-white transition-all ${isMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
+              </div>
+            </button>
 
-      {/* Hamburger Menu */}
-      <div className="absolute top-15 left-20">
-        <button
-          onClick={toggleMenu}
-          className="bg-purple-700 text-white text-base px-8 py-4 border-none rounded-lg"
-        >
-          {/* Icona hamburger (3 lineette) */}
-          <span className="block w-6 h-1 bg-white mb-1"></span>
-          <span className="block w-6 h-1 bg-white mb-1"></span>
-          <span className="block w-6 h-1 bg-white"></span>
-        </button>
-        {/* Menu a tendina che appare quando si clicca sull'icona */}
-        {isMenuOpen && (
-          <div className="absolute bg-purple-700 text-white p-4 rounded-lg mt-2 w-32">
-            <ul className="space-y-2">
-              <li
-                onClick={openStanza}
-                className="cursor-pointer text-center text-lg py-2"
-              >
-                New Session
-              </li>
-              <li
-                onClick={openJoinSessionPopup}
-                className="cursor-pointer text-center text-lg py-2"
-              >
-                Join Session
-              </li>
-              <li
-                onClick={toggleLoFiMusic}
-                className="cursor-pointer text-center text-lg py-2"
-              >
-                {isLoFiMusicOn ? "Stop LO-FI" : "Play LO-FI"}
-              </li>
-            </ul>
+            {isMenuOpen && (
+              <div className="absolute left-0 mt-2 w-48 bg-purple-800 rounded-lg shadow-xl z-50 overflow-hidden">
+                <ul>
+                  <li>
+                    <button
+                      onClick={() => {
+                        navigate("/stanza");
+                        setIsMenuOpen(false);
+                      }}
+                      className="w-full text-left px-4 py-3 hover:bg-purple-700 transition-colors"
+                    >
+                      Nuova sessione
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => {
+                        setIsJoinSessionOpen(true);
+                        setIsMenuOpen(false);
+                      }}
+                      className="w-full text-left px-4 py-3 hover:bg-purple-700 transition-colors"
+                    >
+                      Unisciti a sessione
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={toggleLoFiMusic}
+                      className="w-full text-left px-4 py-3 hover:bg-purple-700 transition-colors"
+                    >
+                      {isLoFiMusicOn ? "🔇 Disattiva musica" : "🔊 Attiva musica"}
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
-      {/* Titolo + Timer */}
-      <div className="flex flex-col items-center justify-center gap-16 pt-12">
-        <h3 className="text-6xl font-bold text-purple-400">
-          È ora di studiare!
-        </h3>
-
-        <div className="w-full">
-          <StudyBreakTimer
-            studyDuration={(parseInt(studyDuration) || 0) * 60}
-            breakDuration={(parseInt(breakDuration) || 0) * 60}
-          />
+          {currentUser && (
+            <div className="hidden md:block bg-gray-800 px-4 py-2 rounded-lg">
+              <p className="text-purple-300">
+                Ciao, {getUserDisplayName()}!
+              </p>
+            </div>
+          )}
         </div>
-      </div>
 
-      {/* Input per la durata di studio e pausa */}
-      <div className="flex justify-center items-center mt-12 gap-8">
-        <div className="flex flex-col items-center">
-          <label className="text-white mb-2 text-lg">Durata Studio (minuti)</label>
-          <input
-            type="number"
-            value={studyDuration}
-            onChange={handleStudyDurationChange}
-            className="bg-gray-700 text-white p-3 rounded-lg text-center w-24 text-xl focus:outline-none focus:ring-2 focus:ring-purple-400 no-spinner"
-            min="0"
-          />
-        </div>
-        <div className="flex flex-col items-center">
-          <label className="text-white mb-2 text-lg">Durata Pausa (minuti)</label>
-          <input
-            type="number"
-            value={breakDuration}
-            onChange={handleBreakDurationChange}
-            className="bg-gray-700 text-white p-3 rounded-lg text-center w-24 text-xl focus:outline-none focus:ring-2 focus:ring-purple-400 no-spinner"
-            min="0"
-          />
-        </div>
-      </div>
+        {/* Titolo centrato */}
+        <h1 className="text-2xl md:text-4xl font-bold text-purple-400 text-center">
+          MeowFocus
+        </h1>
 
-      {/* Popup Join Session */}
-      {isJoinSessionOpen && <Join_session closePopup={closeJoinSessionPopup} />}
+        {/* Parte destra - Logout */}
+        <div className="flex justify-end">
+          <button
+            onClick={handleLogout}
+            className="bg-purple-700 hover:bg-purple-600 px-4 py-2 md:px-6 md:py-3 rounded-lg transition-colors"
+          >
+            Logout
+          </button>
+        </div>
+      </header>
+
+      {/* Contenuto principale */}
+      <main className="max-w-4xl mx-auto">
+        <section className="mb-12 text-center">
+          <h2 className="text-3xl md:text-5xl font-bold text-purple-300 mb-6">
+            È ora di studiare in gruppo!
+          </h2>
+
+          <div className="bg-gray-800 p-6 rounded-xl shadow-lg flex justify-center items-center min-h-[200px]">
+            <StudyBreakTimer
+              studyDuration={(studyDuration || 0) * 60}
+              breakDuration={(breakDuration || 0) * 60}
+            />
+          </div>
+        </section>
+
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+          <div className="bg-gray-800 p-6 rounded-xl">
+            <label className="block text-purple-300 text-lg mb-2">
+              Durata studio (minuti)
+            </label>
+            <input
+              type="number"
+              value={studyDuration}
+              onChange={handleDurationChange(setStudyDuration)}
+              className="w-full bg-gray-700 text-white p-3 rounded-lg text-center text-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+              min="1"
+              max="120"
+            />
+          </div>
+
+          <div className="bg-gray-800 p-6 rounded-xl">
+            <label className="block text-purple-300 text-lg mb-2">
+              Durata pausa (minuti)
+            </label>
+            <input
+              type="number"
+              value={breakDuration}
+              onChange={handleDurationChange(setBreakDuration)}
+              className="w-full bg-gray-700 text-white p-3 rounded-lg text-center text-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+              min="1"
+              max="30"
+            />
+          </div>
+        </section>
+      </main>
+
+      {isJoinSessionOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-xl max-w-md w-full p-6 border border-purple-500">
+            <JoinSession closePopup={() => setIsJoinSessionOpen(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

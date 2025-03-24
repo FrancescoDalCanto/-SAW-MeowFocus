@@ -1,79 +1,121 @@
-/**
- * 
- * TODO: Devo Aggiungere la lista delle sessioni attive
- * 
- * TODO: Devo aggiungere un piccolo Easter egg che compare e scompare se viene passato il mouse sopra, questo sul lato di destra
- */
-
 import React, { useState, useEffect } from "react";
-import "./App.css";
-import Popup from "./Popup";
 import { useAuth } from "./AuthContext";
 import { useNavigate } from "react-router-dom";
+import Popup from "./Popup";
+import ActiveSessions from "./ActiveSessions"; // Nuovo componente per le sessioni attive
+import "./App.css";
 
-/**
- * Componente principale dell'applicazione
- * Gestisce la pagina di login/registrazione
- * @returns {JSX.Element} Rendering della pagina principale
- */
 function App() {
-  // Stato per controllare la visibilità del popup
   const [showPopup, setShowPopup] = useState(false);
-  // Stato per definire il tipo di popup (Login o Register)
   const [popupType, setPopupType] = useState("");
-  // Ottieni l'utente corrente dal contesto di autenticazione
+  const [showEasterEgg, setShowEasterEgg] = useState(false);
+  const [activeSessions, setActiveSessions] = useState([]);
   const { currentUser } = useAuth();
-  // Hook per la navigazione programmatica
   const navigate = useNavigate();
 
-  // Effetto per reindirizzare l'utente già autenticato alla sua pagina personale
   useEffect(() => {
     if (currentUser) {
       navigate("/user");
     }
+
+    // Simulazione fetch sessioni attive (sostituire con chiamata API reale)
+    const fetchActiveSessions = async () => {
+      try {
+        // const response = await fetch('/api/sessions');
+        // const data = await response.json();
+        const mockData = [
+          { id: 1, name: "Sessione Matematica", participants: 3 },
+          { id: 2, name: "Sessione Programmazione", participants: 5 },
+          { id: 3, name: "Sessione Design", participants: 2 }
+        ];
+        setActiveSessions(mockData);
+      } catch (error) {
+        console.error("Error fetching sessions:", error);
+      }
+    };
+
+    fetchActiveSessions();
   }, [currentUser, navigate]);
 
-  /**
-   * Funzione per aprire il popup di autenticazione
-   * @param {string} type - Tipo di popup ("Login" o "Register")
-   */
   const openPopup = (type) => {
     setPopupType(type);
     setShowPopup(true);
   };
 
-  /**
-   * Funzione per chiudere il popup di autenticazione
-   */
   const closePopup = () => {
     setShowPopup(false);
   };
 
+  const toggleEasterEgg = () => {
+    setShowEasterEgg(!showEasterEgg);
+  };
+
   return (
-    <div className="grid grid-cols-1 place-items-center h-screen w-full bg-black p-4">
-      {/* Titolo dell'applicazione */}
-      <h1 className="text-6xl font-bold text-purple-400 mt-8 mb-16">MeowFocus</h1>
-
-      {/* Logo dell'applicazione */}
-      <img src="../public/Pomostudy.png" alt="MeowFocus" className="max-w-[500px] w-full h-auto mb-8" />
-
-      {/* Pulsanti per l'autenticazione */}
-      <div className="flex gap-4">
-        <button
-          className="bg-purple-500 text-white text-base px-8 py-[15px] border-none rounded-lg"
-          onClick={() => openPopup("Login")}
-        >
-          Login
-        </button>
-        <button
-          className="bg-purple-500 text-white text-base px-8 py-[15px] border-none rounded-lg"
-          onClick={() => openPopup("Register")}
-        >
-          Register
-        </button>
+    <div className="min-h-screen bg-gray-900 text-white p-6 relative overflow-hidden">
+      {/* Easter Egg (gattino che appare a destra) */}
+      <div
+        className={`fixed right-8 bottom-8 transition-all duration-500 transform ${showEasterEgg ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}
+        onMouseLeave={toggleEasterEgg}
+      >
+        <div className="bg-purple-700 p-4 rounded-lg shadow-xl">
+          <img
+            src="/gattino_segretino.png"
+            alt="Easter Egg Cat"
+            className="w-16 h-16 animate-bounce"
+          />
+          <p className="text-xs mt-2">Psst! Hai trovato il gattino segreto!</p>
+        </div>
       </div>
 
-      {/* Popup di autenticazione (condizionale) */}
+      {/* Area trigger easter egg */}
+      <div
+        className="fixed right-0 top-1/2 h-32 w-8 -translate-y-1/2 cursor-pointer"
+        onMouseEnter={toggleEasterEgg}
+      ></div>
+
+      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-screen py-12">
+        {/* Sezione sinistra: Logo e titolo */}
+        <div className="flex flex-col items-center lg:items-end justify-center space-y-8">
+          <h1 className="text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 text-center lg:text-right">
+            MeowFocus
+          </h1>
+
+          <img
+            src="/Pomostudy.png"
+            alt="MeowFocus"
+            className="w-full max-w-md lg:max-w-lg h-auto transform hover:scale-105 transition-transform duration-300"
+          />
+        </div>
+
+        {/* Sezione destra: Contenuto */}
+        <div className="flex flex-col items-center lg:items-start justify-center space-y-8">
+          {/* Lista sessioni attive */}
+          {activeSessions.length > 0 && (
+            <div className="w-full max-w-md bg-gray-800 rounded-xl p-6 shadow-lg">
+              <h2 className="text-2xl font-bold text-purple-300 mb-4">Sessioni Attive</h2>
+              <ActiveSessions sessions={activeSessions} />
+            </div>
+          )}
+
+          {/* Pulsanti autenticazione */}
+          <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
+            <button
+              className="flex-1 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white text-lg px-6 py-4 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
+              onClick={() => openPopup("Login")}
+            >
+              Login
+            </button>
+            <button
+              className="flex-1 bg-gradient-to-r from-pink-600 to-pink-500 hover:from-pink-700 hover:to-pink-600 text-white text-lg px-6 py-4 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
+              onClick={() => openPopup("Register")}
+            >
+              Register
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Popup di autenticazione */}
       {showPopup && <Popup type={popupType} onClose={closePopup} />}
     </div>
   );

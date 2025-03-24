@@ -1,5 +1,12 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  updateProfile
+} from "firebase/auth";
 
 /**
  * Configurazione di Firebase
@@ -23,4 +30,4 @@ const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
 // Esportazione dei servizi e metodi di autenticazione
-export { auth, signInWithEmailAndPassword, signInWithPopup, googleProvider, createUserWithEmailAndPassword };
+export { auth, signInWithEmailAndPassword, signInWithPopup, googleProvider, createUserWithEmailAndPassword, updateProfile };

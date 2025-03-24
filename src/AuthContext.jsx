@@ -3,53 +3,54 @@ import { auth } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
 /**
- * Contesto per la gestione dell'autenticazione
- * Permette di condividere informazioni sull'utente in tutta l'applicazione
+ * Contexto di autenticazione
+ * Fornisce lo stato dell'utente e il loading state a tutta l'applicazione
  */
 const AuthContext = createContext();
 
-/**
- * Provider per il contesto di autenticazione
- * @param {Object} props - Proprietà del componente, inclusi i figli
- * @param {React.ReactNode} props.children - Componenti figli che avranno accesso al contesto
- * @returns {JSX.Element} Provider del contesto con i valori di autenticazione
- */
 export const AuthProvider = ({ children }) => {
-  // Stato per memorizzare l'utente corrente
+  // State
   const [currentUser, setCurrentUser] = useState(null);
-  // Stato per tracciare se il caricamento dell'autenticazione è in corso
   const [loading, setLoading] = useState(true);
 
-  // Effetto per monitorare lo stato di autenticazione dell'utente
+  // Effects
   useEffect(() => {
-    // Sottoscrizione agli eventi di autenticazione di Firebase
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user); // Aggiorna lo stato con l'utente corrente (null se non autenticato)
-      setLoading(false); // Indica che il caricamento è completato
-    });
-
-    // Pulizia della sottoscrizione quando il componente viene smontato
-    return unsubscribe;
+    const unsubscribe = onAuthStateChanged(auth, handleAuthStateChange);
+    return () => unsubscribe();
   }, []);
 
-  // Valori da fornire attraverso il contesto
-  const value = {
+  // Handlers
+  const handleAuthStateChange = (user) => {
+    setCurrentUser(user);
+    setLoading(false);
+  };
+
+  // Context value
+  const contextValue = {
     currentUser,
     loading
   };
 
-  // Rendering del provider solo quando il caricamento è completato
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={contextValue}>
       {!loading && children}
     </AuthContext.Provider>
   );
 };
 
 /**
- * Hook personalizzato per utilizzare il contesto di autenticazione
- * @returns {Object} Valori del contesto di autenticazione
+ * Hook per accedere al contesto di autenticazione
+ * @returns {{
+ *  currentUser: firebase.User|null,
+ *  loading: boolean
+ * }}
  */
 export const useAuth = () => {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+
+  return context;
 };

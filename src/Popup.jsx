@@ -1,211 +1,188 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth, signInWithEmailAndPassword, signInWithPopup, googleProvider, createUserWithEmailAndPassword } from "./firebase";
+import { auth, signInWithEmailAndPassword, signInWithPopup, googleProvider, createUserWithEmailAndPassword, updateProfile } from "./firebase";
 
-/**
- * Componente Popup per gestire l'autenticazione
- * Supporta login e registrazione con email/password e autenticazione Google
- * @param {Object} props - Proprietà del componente
- * @param {string} props.type - Tipo di popup ("Login" o "Register")
- * @param {Function} props.onClose - Funzione per chiudere il popup
- * @returns {JSX.Element} Rendering del popup di autenticazione
- */
 const Popup = ({ type, onClose }) => {
-  // Stati per gestire i dati del form
-  const [email, setEmail] = useState("");  
-  const [password, setPassword] = useState("");  
-  const [loading, setLoading] = useState(false);  
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState(""); // Aggiunto stato per il nome
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  // Hook per la navigazione programmatica
   const navigate = useNavigate();
 
-  /**
-   * Gestisce il login con email e password
-   * @async
-   */
-  const handleEmailPasswordLogin = async () => {
+  const handleAuthAction = async (authFunction, isGoogle = false) => {
     setLoading(true);
+    setError("");
     try {
-      // Tenta il login con Firebase
-      await signInWithEmailAndPassword(auth, email, password);
-      console.log("Email/Password Login successful");    
-      // Reindirizza alla pagina utente
+      await authFunction();
       navigate("/user");
-      // Chiude il popup
-      onClose();  
+      onClose();
     } catch (error) {
-      console.error("Error logging in with email/password: ", error.message);
-      // Gestisce l'errore di autenticazione
       handleFirebaseError(error);
     } finally {
       setLoading(false);
     }
   };
 
-  /**
-   * Gestisce la registrazione con email e password
-   * @async
-   */
-  const handleEmailPasswordRegister = async () => {
-    setLoading(true);
-    try {
-      // Tenta la registrazione con Firebase
-      await createUserWithEmailAndPassword(auth, email, password);
-      console.log("Email/Password Registration successful");
-      // Reindirizza alla pagina utente
-      navigate("/user");
-      // Chiude il popup
-      onClose();  
-    } catch (error) {
-      console.error("Error registering with email/password: ", error.message);
-      // Gestisce l'errore di registrazione
-      handleFirebaseError(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /**
-   * Gestisce il login con Google
-   * @async
-   */
-  const handleGoogleLogin = async () => {
-    try {
-      // Tenta il login con Google tramite Firebase
-      await signInWithPopup(auth, googleProvider);
-      console.log("Google login successful");
-      // Reindirizza alla pagina utente
-      navigate("/user");
-      // Chiude il popup
-      onClose();  
-    } catch (error) {
-      console.error("Error logging in with Google: ", error.message);
-      // Gestisce l'errore di autenticazione
-      handleFirebaseError(error);
-    }
-  };
-
-  /**
-   * Gestisce gli errori di Firebase e li traduce in messaggi comprensibili
-   * @param {Object} error - Oggetto errore di Firebase
-   */
   const handleFirebaseError = (error) => {
-    let errorMessage = "An error occurred, please try again.";
+    const errorMessages = {
+      'auth/invalid-email': "Email non valida. Controlla il formato.",
+      'auth/user-disabled': "Account disabilitato. Contatta il supporto.",
+      'auth/user-not-found': "Nessun account con questa email.",
+      'auth/wrong-password': "Password errata.",
+      'auth/email-already-in-use': "Email già in uso.",
+      'auth/weak-password': "Password troppo debole (min. 6 caratteri).",
+      'auth/network-request-failed': "Errore di connessione. Verifica la tua rete.",
+      'auth/too-many-requests': "Troppi tentativi. Riprova più tardi."
+    };
 
-    // Personalizza i messaggi di errore in base al codice
-    switch (error.code) {
-      case 'auth/invalid-email':
-        errorMessage = "L'indirizzo email non è valido. Per favore, controlla il formato.";
-        break;
-      case 'auth/user-disabled':
-        errorMessage = "Il tuo account è stato disabilitato. Per favore, contatta il supporto.";
-        break;
-      case 'auth/user-not-found':
-        errorMessage = "Nessun utente trovato con questo indirizzo email.";
-        break;
-      case 'auth/wrong-password':
-        errorMessage = "La password che hai inserito è errata.";
-        break;
-      case 'auth/email-already-in-use':
-        errorMessage = "L'indirizzo email è già in uso da un altro account.";
-        break;
-      case 'auth/weak-password':
-        errorMessage = "La tua password è troppo debole. Per favore, scegli una password più forte.";
-        break;
-      default:
-        errorMessage = error.message;
+    setError(errorMessages[error.code] || error.message);
+  };
+
+  // Nuova funzione per registrazione con nome
+  const handleRegister = async () => {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(userCredential.user, {
+        displayName: name
+      });
+      navigate("/user");
+      onClose();
+    } catch (error) {
+      handleFirebaseError(error);
     }
-
-    // Imposta il messaggio di errore
-    setError(errorMessage);
   };
 
   return (
-    <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white p-8 rounded-lg w-[400px]">
-        {/* Titolo del popup */}
-        <h2 className="text-2xl mb-4">{type} Form</h2>
-        
-        {/* Visualizzazione degli errori */}
-        {error && <div className="text-red-500 mb-4">{error}</div>}
-
-        {/* Form di login */}
-        {type === "Login" && (
-          <div className="grid gap-4 mb-4">
-            <input 
-              type="email" 
-              placeholder="Email" 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2 border rounded" 
-            />
-            <input 
-              type="password" 
-              placeholder="Password" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 border rounded" 
-            />
-            <button 
-              className="w-full bg-[#FFA500] text-white p-2 rounded"
-              onClick={handleEmailPasswordLogin}
-              disabled={loading} 
+    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+      <div className="bg-gray-800 rounded-xl max-w-md w-full border border-purple-500 overflow-hidden">
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-purple-400">
+              {type === "Login" ? "Accedi" : "Registrati"}
+            </h2>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-white transition-colors"
+              aria-label="Chiudi"
             >
-              {loading ? "Logging in..." : "Login with Email/Password"}
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
           </div>
-        )}
 
-        {/* Form di registrazione */}
-        {type === "Register" && (
-          <div className="grid gap-4 mb-4">
-            <input 
-              type="email" 
-              placeholder="Email" 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2 border rounded" 
-            />
-            <input 
-              type="password" 
-              placeholder="Password" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 border rounded" 
-            />
-            <button 
-              className="w-full bg-[#FFA500] text-white p-2 rounded"
-              onClick={handleEmailPasswordRegister}
-              disabled={loading} 
+          {error && (
+            <div className="bg-red-900/50 border border-red-500 text-red-200 px-4 py-3 rounded-lg mb-4">
+              {error}
+            </div>
+          )}
+
+          <div className="space-y-4">
+            {/* Aggiunto campo nome solo per registrazione */}
+            {type === "Register" && (
+              <div>
+                <label htmlFor="name" className="block text-purple-300 mb-2">Nome completo</label>
+                <input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full bg-gray-700 text-white p-3 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                  placeholder="Il tuo nome"
+                  disabled={loading}
+                />
+              </div>
+            )}
+
+            <div>
+              <label htmlFor="email" className="block text-purple-300 mb-2">Email</label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-gray-700 text-white p-3 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                placeholder="tua@email.com"
+                disabled={loading}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-purple-300 mb-2">Password</label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-gray-700 text-white p-3 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                placeholder={type === "Login" ? "La tua password" : "Min. 6 caratteri"}
+                disabled={loading}
+              />
+            </div>
+
+            <button
+              onClick={() => type === "Login"
+                ? handleAuthAction(() => signInWithEmailAndPassword(auth, email, password))
+                : handleRegister() // Usa la nuova funzione per la registrazione
+              }
+              disabled={loading}
+              className={`w-full py-3 px-4 rounded-lg font-medium transition-all ${loading
+                ? 'bg-purple-800 cursor-not-allowed'
+                : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-purple-500/20'
+                }`}
             >
-              {loading ? "Registering..." : "Register with Email/Password"}
+              {loading ? (
+                <span className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  {type === "Login" ? "Accesso in corso..." : "Registrazione in corso..."}
+                </span>
+              ) : (
+                type === "Login" ? "Accedi con Email" : "Registrati"
+              )}
             </button>
           </div>
-        )}
 
-        {/* Login con Google */}
-        <div className="flex justify-center items-center mt-4">
-          <button 
-            className="bg-white text-[#4285F4] p-2 border border-[#4285F4] rounded-lg"
-            onClick={handleGoogleLogin}
-            disabled={loading} 
+          <div className="flex items-center my-6">
+            <div className="flex-1 border-t border-gray-600"></div>
+            <span className="px-4 text-gray-400">oppure</span>
+            <div className="flex-1 border-t border-gray-600"></div>
+          </div>
+
+          <button
+            onClick={() => handleAuthAction(() => signInWithPopup(auth, googleProvider), true)}
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-3 bg-white/10 hover:bg-white/20 border border-white/20 text-white py-3 px-4 rounded-lg font-medium transition-colors"
           >
-            <img 
-              src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" 
-              alt="Google Logo" 
-              className="w-6 inline-block mr-2"
+            <img
+              src="https://www.google.com/images/branding/googleg/1x/googleg_standard_color_48dp.png"
+              alt="Google"
+              className="h-5 w-5"
             />
-            Login with Google
+            Continua con Google
           </button>
         </div>
 
-        {/* Pulsante per chiudere il popup */}
-        <button 
-          onClick={onClose} 
-          className="mt-4 w-full bg-gray-500 text-white p-2 rounded"
-        >
-          Close
-        </button>
+        <div className="bg-gray-900/50 px-6 py-4 text-center">
+          <p className="text-gray-400">
+            {type === "Login"
+              ? "Non hai un account? "
+              : "Hai già un account? "
+            }
+            <button
+              onClick={() => {
+                setError(""); // Resetta gli errori quando cambi tipo
+                setType(type === "Login" ? "Register" : "Login");
+              }}
+              className="text-purple-400 hover:text-purple-300 font-medium transition-colors"
+            >
+              {type === "Login" ? "Registrati" : "Accedi"}
+            </button>
+          </p>
+        </div>
       </div>
     </div>
   );

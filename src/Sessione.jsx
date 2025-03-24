@@ -1,184 +1,192 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Importa useNavigate per la navigazione
+import { useNavigate } from "react-router-dom";
 import StudyBreakTimer from "./Timer";
-import { Howl } from "howler"; // Usa Howler.js per la gestione della musica LO-FI
+import { Howl } from "howler";
 
-/**
- * Componente della pagina utente personale
- * Accessibile solo dopo l'autenticazione
- * @returns {JSX.Element} Rendering della pagina utente
- */
 function Stanza() {
-    const navigate = useNavigate(); // Hook per navigare tra le pagine
+    const navigate = useNavigate();
     const [studyDuration, setStudyDuration] = useState(25);
     const [breakDuration, setBreakDuration] = useState(5);
-    const [isLinkPopupOpen, setIsLinkPopupOpen] = useState(false); // Stato per il pop-up
-    const [isMenuOpen, setIsMenuOpen] = useState(false); // Stato per gestire l'apertura/chiusura del menu
-    const [isLoFiMusicOn, setIsLoFiMusicOn] = useState(false); // Stato per la musica LO-FI
+    const [isLinkPopupOpen, setIsLinkPopupOpen] = useState(false);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isLoFiMusicOn, setIsLoFiMusicOn] = useState(false);
+    const [sessionLink, setSessionLink] = useState("https://meowfocus.com/session/abc123");
 
-    // Gestione della musica LO-FI
     const loFiMusic = new Howl({
-        src: ["path_to_lofi_music.mp3"], // Sostituisci con il percorso del tuo file audio LO-FI
+        src: ["path_to_lofi_music.mp3"],
         loop: true,
     });
 
-    // Funzione per attivare/disattivare la musica LO-FI
     const toggleLoFiMusic = () => {
         if (isLoFiMusicOn) {
-            loFiMusic.stop(); // Ferma la musica se è già attiva
+            loFiMusic.stop();
         } else {
-            loFiMusic.play(); // Avvia la musica se non è attiva
+            loFiMusic.play();
         }
-        setIsLoFiMusicOn(!isLoFiMusicOn); // Cambia lo stato della musica
+        setIsLoFiMusicOn(!isLoFiMusicOn);
     };
 
     const handleStudyDurationChange = (e) => {
         const value = e.target.value;
         if (value === "") {
-            setStudyDuration(""); // Permette di lasciare vuoto l'input temporaneamente
+            setStudyDuration("");
             return;
         }
-
         const parsedValue = parseInt(value);
-        if (!isNaN(parsedValue) && parsedValue >= 0) {
-            setStudyDuration(parsedValue);
+        if (!isNaN(parsedValue)) {
+            setStudyDuration(Math.max(0, parsedValue));
         }
     };
 
     const handleBreakDurationChange = (e) => {
         const value = e.target.value;
         if (value === "") {
-            setBreakDuration(""); // Permette di lasciare vuoto l'input temporaneamente
+            setBreakDuration("");
             return;
         }
-
         const parsedValue = parseInt(value);
-        if (!isNaN(parsedValue) && parsedValue >= 0) {
-            setBreakDuration(parsedValue);
+        if (!isNaN(parsedValue)) {
+            setBreakDuration(Math.max(0, parsedValue));
         }
     };
 
-    // Funzione per reindirizzare alla pagina Stanza
-    const openStanza = () => {
-        navigate("/user"); // Reindirizza alla pagina della sessione
-    };
-
-    // Funzione per aprire il popup per il link
-    const openLink = () => {
-        setIsLinkPopupOpen(true); // Apre il pop-up
-    };
-
-    // Funzione per chiudere il pop-up del link
-    const closeLinkPopup = () => {
-        setIsLinkPopupOpen(false); // Chiude il pop-up
-    };
-
-    // Funzione per il pulsante "ShowGraf"
-    const showGraf = () => {
-        console.log("Mostra grafico non definito"); // Placeholder per la logica del grafico
-    };
-
-    // Funzione per gestire l'apertura/chiusura del menu
-    const toggleMenu = () => {
-        setIsMenuOpen(!isMenuOpen);
+    const handleCopyLink = () => {
+        navigator.clipboard.writeText(sessionLink);
+        alert("Link copiato negli appunti!");
     };
 
     return (
-        <div className="flex flex-col items-center justify-start min-h-screen w-full bg-black px-12 py-8">
-            {/* Pulsante di logout */}
-            <button
-                onClick={openStanza}
-                className="absolute top-15 right-20 bg-purple-700 text-white text-base px-8 py-[15px] border-none rounded-lg"
-            >
-                EXIT
-            </button>
+        <div className="min-h-screen bg-gray-900 text-white p-4 md:p-8">
+            {/* Header */}
+            <header className="flex justify-between items-center mb-8 md:mb-12">
+                <div className="relative">
+                    {/* Hamburger Menu Button */}
+                    <button
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                        className={`p-3 rounded-lg transition-colors ${isMenuOpen ? 'bg-purple-700' : 'bg-purple-800 hover:bg-purple-700'}`}
+                        aria-label="Menu"
+                    >
+                        <div className="space-y-1.5 w-6">
+                            <span className={`block h-0.5 bg-white transition-all ${isMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
+                            <span className={`block h-0.5 bg-white ${isMenuOpen ? 'opacity-0' : ''}`}></span>
+                            <span className={`block h-0.5 bg-white transition-all ${isMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
+                        </div>
+                    </button>
 
-            <div className="flex flex-col items-center justify-center gap-32 h-full pt-12 pb-24">
-                {/* Titolo di benvenuto */}
-                <h3 className="text-6xl font-bold text-purple-400">È ora di studiare in gruppo!</h3>
-
-                {/* Timer con durate uguali a tutti i membri della sessione */}
-                <div className="">
-                    <StudyBreakTimer
-                        studyDuration={(parseInt(studyDuration) || 0) * 60}
-                        breakDuration={(parseInt(breakDuration) || 0) * 60}
-                    />
+                    {/* Dropdown Menu */}
+                    {isMenuOpen && (
+                        <div className="absolute left-0 mt-2 w-48 bg-purple-800 rounded-lg shadow-xl z-50 overflow-hidden">
+                            <ul>
+                                <li>
+                                    <button
+                                        onClick={() => {
+                                            setIsLinkPopupOpen(true);
+                                            setIsMenuOpen(false);
+                                        }}
+                                        className="w-full text-left px-4 py-3 hover:bg-purple-700 transition-colors"
+                                    >
+                                        Condividi sessione
+                                    </button>
+                                </li>
+                                <li>
+                                    <button
+                                        onClick={toggleLoFiMusic}
+                                        className="w-full text-left px-4 py-3 hover:bg-purple-700 transition-colors"
+                                    >
+                                        {isLoFiMusicOn ? "🔇 Disattiva musica" : "🔊 Attiva musica"}
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    )}
                 </div>
-            </div>
 
-            {/* Pulsanti di input per impostare il tempo di studio e di pausa */}
-            <div className="flex justify-center items-center w-full mb-10 gap-8">
-                <div className="flex flex-col items-center">
-                    <label className="text-white mb-2 text-lg">Durata Studio (minuti)</label>
-                    <input
-                        type="number"
-                        value={studyDuration}
-                        onChange={handleStudyDurationChange}
-                        className="bg-gray-700 text-white p-3 rounded-lg text-center w-24 text-xl focus:outline-none focus:ring-2 focus:ring-purple-400 no-spinner"
-                        min="0"
-                    />
-                </div>
-                <div className="flex flex-col items-center">
-                    <label className="text-white mb-2 text-lg">Durata Pausa (minuti)</label>
-                    <input
-                        type="number"
-                        value={breakDuration}
-                        onChange={handleBreakDurationChange}
-                        className="bg-gray-700 text-white p-3 rounded-lg text-center w-24 text-xl focus:outline-none focus:ring-2 focus:ring-purple-400 no-spinner"
-                        min="0"
-                    />
-                </div>
-            </div>
+                <h1 className="text-2xl md:text-4xl font-bold text-purple-400 text-center">
+                    MeowFocus
+                </h1>
 
-            {/* Menu a tendina con l'icona delle 3 linee (hamburger menu) */}
-            <div className="absolute top-15 left-20">
                 <button
-                    onClick={toggleMenu}
-                    className="bg-purple-700 text-white text-base px-8 py-[15px] border-none rounded-lg"
+                    onClick={() => navigate("/user")}
+                    className="bg-purple-700 hover:bg-purple-600 px-4 py-2 md:px-6 md:py-3 rounded-lg transition-colors"
                 >
-                    {/* Icona hamburger (3 lineette) */}
-                    <span className="block w-6 h-1 bg-white mb-1"></span>
-                    <span className="block w-6 h-1 bg-white mb-1"></span>
-                    <span className="block w-6 h-1 bg-white"></span>
+                    Esci
                 </button>
-                {/* Menu a tendina che appare quando si clicca sull'icona */}
-                {isMenuOpen && (
-                    <div className="absolute bg-purple-700 text-white p-4 rounded-lg mt-2">
-                        <ul>
-                            <li onClick={openLink} className="cursor-pointer mb-2">Link</li>
-                            <li onClick={() => showGraf()} className="cursor-pointer">ShowGraf</li>
-                            <li onClick={toggleLoFiMusic} className="cursor-pointer">
-                                {isLoFiMusicOn ? "Stop LO-FI" : "Play LO-FI"}
-                            </li>
-                        </ul>
-                    </div>
-                )}
-            </div>
+            </header>
 
-            {/* Pop-up Link */}
+            {/* Main Content */}
+            <main className="max-w-4xl mx-auto">
+                <section className="mb-12 text-center">
+                    <h2 className="text-3xl md:text-5xl font-bold text-purple-300 mb-6">
+                        È ora di studiare in gruppo!
+                    </h2>
+
+                    <div className="bg-gray-800 p-6 rounded-xl shadow-lg flex justify-center items-center min-h-[200px]">
+                        <StudyBreakTimer
+                            studyDuration={(studyDuration || 0) * 60}
+                            breakDuration={(breakDuration || 0) * 60}
+                        />
+                    </div>
+                </section>
+
+                <section className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                    <div className="bg-gray-800 p-6 rounded-xl">
+                        <label className="block text-purple-300 text-lg mb-2">Durata studio (minuti)</label>
+                        <input
+                            type="number"
+                            value={studyDuration}
+                            onChange={handleStudyDurationChange}
+                            className="w-full bg-gray-700 text-white p-3 rounded-lg text-center text-xl focus:outline-none focus:ring-2 focus:ring-purple-500 no-spinner"
+                            min="1"
+                        />
+                    </div>
+
+                    <div className="bg-gray-800 p-6 rounded-xl">
+                        <label className="block text-purple-300 text-lg mb-2">Durata pausa (minuti)</label>
+                        <input
+                            type="number"
+                            value={breakDuration}
+                            onChange={handleBreakDurationChange}
+                            className="w-full bg-gray-700 text-white p-3 rounded-lg text-center text-xl focus:outline-none focus:ring-2 focus:ring-purple-500 no-spinner"
+                            min="1"
+                        />
+                    </div>
+                </section>
+            </main>
+
+            {/* Link Share Popup */}
             {isLinkPopupOpen && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-                    <div className="bg-white p-6 rounded-lg w-96">
-                        <h2 className="text-xl font-bold text-center mb-4">Link per la sessione</h2>
-                        <p className="text-center mb-4">Condividi il link della tua sessione con gli altri membri per unirsi.</p>
-                        <div className="flex justify-center items-center mb-4">
+                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+                    <div className="bg-gray-800 rounded-xl max-w-md w-full p-6 border border-purple-500">
+                        <h3 className="text-2xl font-bold text-purple-300 mb-4">Condividi sessione</h3>
+                        <p className="text-gray-300 mb-4">
+                            Condividi questo link con i tuoi compagni per studiare insieme:
+                        </p>
+
+                        <div className="flex mb-6">
                             <input
                                 type="text"
-                                value="https://esempio.com/sessione"
-                                readOnly
-                                className="bg-gray-200 text-black p-3 rounded-lg w-full text-center"
+                                value={sessionLink}
+                                onChange={(e) => setSessionLink(e.target.value)}
+                                className="flex-1 bg-gray-700 text-white p-3 rounded-l-lg focus:outline-none focus:ring-1 focus:ring-purple-500"
                             />
+                            <button
+                                onClick={handleCopyLink}
+                                className="bg-purple-600 hover:bg-purple-500 px-4 rounded-r-lg transition-colors"
+                            >
+                                Copia
+                            </button>
                         </div>
+
                         <button
-                            onClick={closeLinkPopup}
-                            className="bg-purple-700 text-white text-base px-8 py-[15px] border-none rounded-lg w-full"
+                            onClick={() => setIsLinkPopupOpen(false)}
+                            className="w-full bg-gray-700 hover:bg-gray-600 py-3 rounded-lg transition-colors"
                         >
                             Chiudi
                         </button>
                     </div>
                 </div>
             )}
-        </div >
+        </div>
     );
 }
 

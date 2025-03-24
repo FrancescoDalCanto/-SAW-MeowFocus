@@ -32,7 +32,7 @@ const Join_session = ({ closePopup }) => {
                 </button>
 
                 {/* Titolo del popup */}
-                <h2 className="text-2xl mb-4 text-center">{type} Join in a session</h2>
+                <h2 className="text-2xl mb-4 text-center">{type} Join in una sessione</h2>
 
                 {/* Box per inserire il link */}
                 <div className="grid gap-4 mb-4">

@@ -55,7 +55,7 @@ function App() {
       <h1 className="text-6xl font-bold text-purple-400 mt-8 mb-16">MeowFocus</h1>
 
       {/* Logo dell'applicazione */}
-      <img src="../public/PomoStudy.png" alt="MeowFocus" className="max-w-[500px] w-full h-auto mb-8" />
+      <img src="../public/Pomostudy.png" alt="MeowFocus" className="max-w-[500px] w-full h-auto mb-8" />
 
       {/* Pulsanti per l'autenticazione */}
       <div className="flex gap-4">

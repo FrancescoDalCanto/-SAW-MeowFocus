@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "./AuthContext";
 import { useNavigate } from "react-router-dom";
 import Popup from "./Popup";
-import ActiveSessions from "./ActiveSessions"; // Nuovo componente per le sessioni attive
+import ActiveSessions from "./ActiveSessions";
 import "./App.css";
 
 function App() {
@@ -18,15 +18,16 @@ function App() {
       navigate("/user");
     }
 
-    // Simulazione fetch sessioni attive (sostituire con chiamata API reale)
     const fetchActiveSessions = async () => {
       try {
-        // const response = await fetch('/api/sessions');
-        // const data = await response.json();
         const mockData = [
           { id: 1, name: "Sessione Matematica", participants: 3 },
           { id: 2, name: "Sessione Programmazione", participants: 5 },
-          { id: 3, name: "Sessione Design", participants: 2 }
+          { id: 3, name: "Sessione Design", participants: 2 },
+          { id: 4, name: "Sessione Storia", participants: 4 },
+          { id: 5, name: "Sessione Inglese", participants: 3 },
+          { id: 6, name: "Sessione Fisica", participants: 2 },
+          { id: 7, name: "Sessione Chimica", participants: 1 }
         ];
         setActiveSessions(mockData);
       } catch (error) {
@@ -52,7 +53,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6 relative overflow-hidden">
-      {/* Easter Egg (gattino che appare a destra) */}
+      {/* Easter Egg */}
       <div
         className={`fixed right-8 bottom-8 transition-all duration-500 transform ${showEasterEgg ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}
         onMouseLeave={toggleEasterEgg}
@@ -74,12 +75,11 @@ function App() {
       ></div>
 
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-screen py-12">
-        {/* Sezione sinistra: Logo e titolo */}
+        {/* Sezione sinistra */}
         <div className="flex flex-col items-center lg:items-end justify-center space-y-8">
           <h1 className="text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 text-center lg:text-right">
             MeowFocus
           </h1>
-
           <img
             src="/Pomostudy.png"
             alt="MeowFocus"
@@ -87,15 +87,17 @@ function App() {
           />
         </div>
 
-        {/* Sezione destra: Contenuto */}
-        <div className="flex flex-col items-center lg:items-start justify-center space-y-8">
-          {/* Lista sessioni attive */}
-          {activeSessions.length > 0 && (
-            <div className="w-full max-w-md bg-gray-800 rounded-xl p-6 shadow-lg">
+        {/* Sezione destra con scroll */}
+        <div className="flex flex-col items-center lg:items-start justify-center space-y-8 h-full">
+          {/* Container per sessioni attive con altezza fissa e scroll */}
+          <div className="w-full max-w-md bg-gray-800 rounded-xl shadow-lg flex flex-col" style={{ height: '400px' }}>
+            <div className="p-6 pb-0">
               <h2 className="text-2xl font-bold text-purple-300 mb-4">Sessioni Attive</h2>
+            </div>
+            <div className="flex-1 overflow-y-auto px-6 pb-6">
               <ActiveSessions sessions={activeSessions} />
             </div>
-          )}
+          </div>
 
           {/* Pulsanti autenticazione */}
           <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">

@@ -129,7 +129,7 @@ function User() {
       <main className="max-w-4xl mx-auto">
         <section className="mb-12 text-center">
           <h2 className="text-3xl md:text-5xl font-bold text-purple-300 mb-6">
-            È ora di studiare in gruppo!
+            È ora di studiare!
           </h2>
 
           <div className="bg-gray-800 p-6 rounded-xl shadow-lg flex justify-center items-center min-h-[200px]">
@@ -149,7 +149,7 @@ function User() {
               type="number"
               value={studyDuration}
               onChange={handleDurationChange(setStudyDuration)}
-              className="w-full bg-gray-700 text-white p-3 rounded-lg text-center text-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full bg-gray-700 text-white p-3 rounded-lg text-center text-xl focus:outline-none focus:ring-2 focus:ring-purple-500 no-spinner"
               min="1"
               max="120"
             />
@@ -163,7 +163,7 @@ function User() {
               type="number"
               value={breakDuration}
               onChange={handleDurationChange(setBreakDuration)}
-              className="w-full bg-gray-700 text-white p-3 rounded-lg text-center text-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full bg-gray-700 text-white p-3 rounded-lg text-center text-xl focus:outline-none focus:ring-2 focus:ring-purple-500 no-spinner"
               min="1"
               max="30"
             />

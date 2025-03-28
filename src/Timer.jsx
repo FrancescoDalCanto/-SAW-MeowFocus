@@ -71,10 +71,16 @@ const StudyBreakTimer = ({ studyDuration, breakDuration }) => {
     setTimeRemaining(studyDuration);
   };
 
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  const formatTime = (seconds, totalDuration) => {
+    if (totalDuration > 1800) { // 30 minuti = 1800 secondi
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const remainingSeconds = seconds % 60;
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
   // Calcola la percentuale per la progress bar
@@ -100,7 +106,7 @@ const StudyBreakTimer = ({ studyDuration, breakDuration }) => {
 
       {/* Timer */}
       <div className="text-8xl font-mono font-bold my-8">
-        {formatTime(timeRemaining)}
+        {formatTime(timeRemaining, totalDuration)}
       </div>
 
       {/* Progress Bar */}
@@ -116,8 +122,8 @@ const StudyBreakTimer = ({ studyDuration, breakDuration }) => {
         <button
           onClick={toggleTimer}
           className={`px-8 py-3 rounded-lg text-lg font-medium transition-all ${isActive
-              ? 'bg-red-600 hover:bg-red-700'
-              : 'bg-green-600 hover:bg-green-700'
+            ? 'bg-red-600 hover:bg-red-700'
+            : 'bg-green-600 hover:bg-green-700'
             } text-white shadow-lg transform hover:scale-105`}
         >
           {isActive ? 'Pausa' : 'Avvia'}

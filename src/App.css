@@ -46,3 +46,28 @@
 .animate-fade-in-out {
     animation: fade-in-out 3s ease-in-out forwards;
 }
+
+
+/* Fix per il ridimensionamento del grafico */
+.chartjs-render-monitor {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 300px;
+    position: relative;
+}
+
+.chartjs-size-monitor {
+    position: absolute !important;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    visibility: hidden;
+    z-index: -1;
+}
+
+/* Migliora la responsive del modal */
+@media (max-width: 640px) {
+    .chartjs-render-monitor {
+        min-height: 250px;
+    }
+}

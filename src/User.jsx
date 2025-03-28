@@ -6,6 +6,7 @@ import { auth } from "./firebase";
 import StudyBreakTimer from "./Timer";
 import JoinSession from "./JoinSession";
 import useLoFiMusic from "./useLoFiMusic";
+import StudyProgress from "./StudyProgress";
 
 function User() {
   const { currentUser } = useAuth();
@@ -14,6 +15,7 @@ function User() {
   const [breakDuration, setBreakDuration] = useState(5);
   const [isJoinSessionOpen, setIsJoinSessionOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProgressOpen, setIsProgressOpen] = useState(false);
   const { isLoFiMusicOn, toggleLoFiMusic } = useLoFiMusic();
 
   const getUserDisplayName = () => {
@@ -45,9 +47,8 @@ function User() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-4 md:p-8 relative">
-      {/* Header con titolo centrato */}
+      {/* Header */}
       <header className="grid grid-cols-3 items-center mb-8 md:mb-12">
-        {/* Parte sinistra - Menu e nome utente */}
         <div className="flex items-center gap-4 justify-start">
           <div className="relative">
             <button
@@ -73,7 +74,7 @@ function User() {
                       }}
                       className="w-full text-left px-4 py-3 hover:bg-purple-700 transition-colors"
                     >
-                      Nuova sessione
+                      🐱 Nuova sessione
                     </button>
                   </li>
                   <li>
@@ -84,7 +85,18 @@ function User() {
                       }}
                       className="w-full text-left px-4 py-3 hover:bg-purple-700 transition-colors"
                     >
-                      Unisciti a sessione
+                      🚪 Unisciti a sessione
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => {
+                        setIsProgressOpen(true);
+                        setIsMenuOpen(false);
+                      }}
+                      className="w-full text-left px-4 py-3 hover:bg-purple-700 transition-colors"
+                    >
+                      📊 Andamento studio
                     </button>
                   </li>
                   <li>
@@ -109,12 +121,10 @@ function User() {
           )}
         </div>
 
-        {/* Titolo centrato */}
         <h1 className="text-2xl md:text-4xl font-bold text-purple-400 text-center">
           MeowFocus
         </h1>
 
-        {/* Parte destra - Logout */}
         <div className="flex justify-end">
           <button
             onClick={handleLogout}
@@ -125,7 +135,7 @@ function User() {
         </div>
       </header>
 
-      {/* Contenuto principale */}
+      {/* Main Content */}
       <main className="max-w-4xl mx-auto">
         <section className="mb-12 text-center">
           <h2 className="text-3xl md:text-5xl font-bold text-purple-300 mb-6">
@@ -171,10 +181,31 @@ function User() {
         </section>
       </main>
 
+      {/* Modals */}
       {isJoinSessionOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
           <div className="bg-gray-800 rounded-xl max-w-md w-full p-6 border border-purple-500">
             <JoinSession closePopup={() => setIsJoinSessionOpen(false)} />
+          </div>
+        </div>
+      )}
+
+      {isProgressOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-xl max-w-2xl w-full mx-4 border border-purple-500 flex flex-col h-[90vh]">
+            <div className="flex justify-between items-center p-6 pb-0">
+              <h3 className="text-xl font-bold text-purple-300">📈 Il mio progresso</h3>
+              <button
+                onClick={() => setIsProgressOpen(false)}
+                className="text-gray-400 hover:text-white text-2xl"
+              >
+                &times;
+              </button>
+            </div>
+
+            <div className="p-6 pt-0 flex-1 min-h-0">
+              <StudyProgress />
+            </div>
           </div>
         </div>
       )}
